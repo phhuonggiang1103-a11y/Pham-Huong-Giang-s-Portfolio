@@ -574,9 +574,23 @@ const waTpl = `
             <li data-en="Managing creative teams and collaborative workflows" data-tw="管理創意團隊與協作工作流程">Managing creative teams and collaborative workflows</li>
             <li data-en="Building an online platform for students passionate about music" data-tw="為熱愛音樂的學生建立線上平台">Building an online platform for students passionate about music</li>
         </ul>
-        <p style="margin-top:15px;">
-            <a href="https://www.facebook.com/w.acoustic.nhh" target="_blank" class="btn-link" style="margin-right:10px;" data-en="🌐 View Fanpage" data-tw="🌐 查看粉絲專頁">🌐 View Fanpage</a>
-            <a href="https://www.instagram.com/w.acoustic_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="btn-link" style="margin-right:10px;" data-en="🌐 View Instagram" data-tw="🌐 查看Instagram">🌐 View Instagram</a>
+       <p style="margin-top:15px; position: relative; z-index: 999;">
+            <a href="https://www.facebook.com/w.acoustic.nhh" 
+               target="_blank" 
+               class="btn-link" 
+               style="margin-right:10px; display: inline-block; pointer-events: auto !important;" 
+               data-en="🌐 View Fanpage" 
+               data-tw="🌐 查看粉絲專頁">
+               ${currentLang === 'en' ? '🌐 View Fanpage' : '🌐 查看粉絲專頁'}
+            </a>
+            <a href="https://www.instagram.com/w.acoustic_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
+               target="_blank" 
+               class="btn-link" 
+               style="display: inline-block; pointer-events: auto !important;" 
+               data-en="🌐 View Instagram" 
+               data-tw="🌐 查看Instagram">
+               ${currentLang === 'en' ? '🌐 View Instagram' : '🌐 查看Instagram'}
+            </a>
         </p>
     </div>
 `;
