@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giang Pham | Interactive Portfolio 2026</title>
+    <style>
+        /* VIBRANT CYBERPUNK / SYNTHWAVE PALETTE */
+        :root {
+            --bg: #090914;
+            --surface: #15152c;
+            --primary: #00f0ff;
+            --secondary: #ff007f;
+            --accent: #ffe600;
+            --text: #ffffff;
+            --muted: #8b8baf;
+            --success: #00ff66;
+            --danger: #ff3333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+        b, strong { color: var(--primary); }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.8s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Language Toggle */
+        #lang-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            background: rgba(21, 21, 44, 0.8); border: 1px solid var(--primary); color: #fff;
+            padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold;
+            backdrop-filter: blur(5px); transition: 0.3s;
+        }
+        #lang-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+
+        /* Hero */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; padding: 2rem;
+            background: radial-gradient(circle at top, #2b0055 0%, #090914 80%);
+        }
+        .hero h1 { font-size: 5rem; letter-spacing: 5px; margin-bottom: 1rem; text-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary); }
+        .hero p { max-width: 800px; font-size: 1.2rem; color: #d0d0e0; margin-bottom: 15px; }
+
+        /* Dashboard */
+        .dashboard { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .section-header { font-size: 2rem; margin: 3rem 0 1.5rem; border-left: 5px solid var(--secondary); padding-left: 15px; text-shadow: 0 0 10px var(--secondary); text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: linear-gradient(145deg, var(--surface), #1a1a3a); padding: 2rem; border-radius: 15px; cursor: pointer; transition: 0.3s; border: 1px solid #333; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 240, 255, 0.2); }
+        .card h3 { color: var(--accent); margin-bottom: 10px; }
+        
+        /* Modals & Content Text */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 1000; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #0f0f1f; width: 95%; max-width: 1000px; max-height: 90vh; 
+            border-radius: 20px; padding: 2.5rem; overflow-y: auto; border: 2px solid var(--secondary);
+            position: relative; box-shadow: 0 0 50px rgba(255, 0, 127, 0.2);
+        }
+        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; color: #fff; cursor: pointer; background: none; border: none; transition: 0.3s; z-index: 10; }
+        .close-btn:hover { color: var(--danger); transform: scale(1.1); }
+
+        ul { padding-left: 20px; margin-bottom: 15px; color: #d0d0e0; }
+        ul li { margin-bottom: 8px; }
+        .content-block h3 { color: var(--secondary); margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .content-block p { margin-bottom: 10px; color: #ccc; }
+
+        /* Image Lightbox */
+        .img-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .img-grid img { width: 100%; border-radius: 10px; border: 1px solid #444; transition: 0.3s; cursor: zoom-in; object-fit: cover; aspect-ratio: 4/3; }
+        .img-grid img:hover { transform: scale(1.05); border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        
+        #lightbox {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 9999; display: flex;
+            justify-content: center; align-items: center; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease; cursor: zoom-out;
+        }
+        #lightbox.active { opacity: 1; pointer-events: auto; }
+        #lightbox img { max-width: 90%; max-height: 90vh; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 0 30px var(--primary); }
+        #lightbox .close-lb { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; cursor: pointer; }
+
+        /* Games Common */
+        .btn-link { display: inline-block; padding: 10px 20px; background: var(--primary); color: #000; text-decoration: none; border-radius: 30px; font-weight: bold; margin-top: 10px; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-link:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+        .external-link { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }
+        .external-link:hover { color: var(--primary); border-color: var(--primary); }
+
+        /* Chat */
+        .chat-box { background: #05050a; height: 350px; border-radius: 15px; padding: 15px; overflow-y: auto; border: 1px solid #333; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 1rem; animation: popIn 0.3s ease; }
+        .msg.bot { background: #222; align-self: flex-start; border-bottom-left-radius: 5px; }
+        .msg.user { background: var(--secondary); align-self: flex-end; border-bottom-right-radius: 5px; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .chat-options { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .chat-btn { background: #1a1a3a; border: 1px solid var(--primary); color: #fff; padding: 10px 15px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .chat-btn:hover { background: var(--primary); color: #000; }
+
+        /* Chèo Drum */
+        .audi-container { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
+        .drum { width: 70px; height: 70px; border-radius: 50%; background: #222; border: 4px solid #555; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; user-select: none; }
+        .drum.lit { background: var(--accent); box-shadow: 0 0 30px var(--accent); border-color: #fff; transform: scale(1.15); }
+        .drum.hit-success { background: var(--success); box-shadow: 0 0 30px var(--success); }
+        .drum.hit-fail { background: var(--danger); box-shadow: 0 0 30px var(--danger); }
+        .score-board { text-align: center; font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+
+        /* Tarot Stage */
+        .tarot-stage { text-align: center; }
+        .tarot-input { width: 80%; max-width: 500px; padding: 15px; border-radius: 30px; border: 2px solid var(--primary); background: transparent; color: #fff; text-align: center; font-size: 1.1rem; outline: none; margin-bottom: 20px; }
+        .tarot-deck { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 20px 0; perspective: 1000px; max-height: 300px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;}
+        .t-card { width: 60px; height: 95px; cursor: pointer; position: relative; transition: transform 0.6s; transform-style: preserve-3d; flex-shrink: 0;}
+        .t-card.flipped { transform: rotateY(180deg) translateY(-15px); box-shadow: 0 10px 20px rgba(255, 0, 127, 0.5); pointer-events: none; }
+        .t-card-front, .t-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 6px; border: 1px solid #fff; }
+        .t-card-front { background: repeating-linear-gradient(45deg, #111, #111 5px, #2a0044 5px, #2a0044 10px); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .t-card-back { transform: rotateY(180deg); background-color: #111; border-color: var(--secondary); display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.6rem; font-weight: bold; color: var(--accent); padding: 2px; flex-direction: column; }
+        .reading-box { background: rgba(255,0,127,0.1); border-left: 4px solid var(--secondary); padding: 20px; border-radius: 0 10px 10px 0; margin-top: 20px; text-align: left; line-height: 1.8;}
+
+        /* Mixer WA */
+        .mixer-board { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; background: linear-gradient(to bottom, #2a2a35, #111); padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid #444; }
+        .channel { display: flex; flex-direction: column; align-items: center; gap: 10px; background: #1a1a24; padding: 10px; border-radius: 8px; border: 1px solid #333; width: 75px; }
+        .channel-lbl { font-size: 0.65rem; color: var(--primary); font-weight: bold; text-transform: uppercase; text-align:center;}
+        .btn-pad { width: 45px; height: 35px; background: #333; border-radius: 5px; cursor: pointer; border: 2px solid #555; transition:0.2s; }
+        .btn-pad:hover { background: #444; border-color:#888;}
+        .btn-pad.active { background: var(--secondary); border-color: #fff; box-shadow: 0 0 15px var(--secondary); }
+        .display-screen { background: #000; border: 2px solid var(--primary); border-radius: 10px; padding: 15px; min-height: 250px; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; margin-bottom: 20px; }
+        .wa-img-display { max-height: 180px; max-width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--secondary); object-fit: contain; }
+        
+        /* Tickets */
+        .game-canvas { width: 100%; height: 400px; background: #0a0a1a; position: relative; overflow: hidden; border-radius: 10px; border: 2px solid #333; user-select: none; }
+        .obj { position: absolute; font-size: 3rem; cursor: crosshair; user-select: none; z-index: 10; padding: 10px; }
+        .obj:active { transform: scale(1.2); }
+
+        /* Closing Section */
+        .closing-section { background: linear-gradient(180deg, var(--bg), #110022); padding: 4rem 2rem; border-top: 2px dashed var(--primary); margin-top: 3rem;}
+        .closing-box { max-width: 1000px; margin: 0 auto; }
+        .close-card { background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <button id="lang-btn" onclick="toggleLang()">🇹🇼 Switch to TW</button>
+
+    <section class="hero fade-in">
+        <h1 data-en="GIANG PHAM" data-tw="范香江 (GIANG PHAM)">GIANG PHAM</h1>
+        <p data-en="I’m Giang Phạm." data-tw="我是范香江。">I’m Giang Phạm.</p>
+        <p data-en="I’m drawn to data, but I refuse to see it as something cold." data-tw="我被數據所吸引，但我拒絕將其視為冰冷的事物。">I’m drawn to data, but I refuse to see it as something cold.</p>
+        <p data-en="My journey began not with algorithms, but with people through conversations, community projects, and experiences that made me curious about how society works." data-tw="我的旅程並非始於演算法，而是始於人——透過對話、社區計畫以及讓我對社會運作感到好奇的經歷。">My journey began not with algorithms, but with people through conversations, community projects, and experiences that made me curious about how society works.</p>
+        <p data-en="Data, to me, is a way to uncover the patterns behind human behavior." data-tw="對我來說，數據是揭示人類行為背後模式的一種方式。">Data, to me, is a way to uncover the patterns behind human behavior.</p>
+        <p data-en="Studying in Taiwan, where a vibrant intellectual culture meets technological innovation, I hope to turn that curiosity into analytical tools that create meaningful solutions." data-tw="在充滿活力的知識文化與技術創新交匯的台灣學習，我希望能將這種好奇心轉化為創造有意義解決方案的分析工具。">Studying in Taiwan, where a vibrant intellectual culture meets technological innovation, I hope to turn that curiosity into analytical tools that create meaningful solutions.</p>
+        
+        <p style="margin-top:40px; color: var(--accent); cursor:pointer; font-weight:bold; letter-spacing: 2px;" onclick="document.getElementById('dash').scrollIntoView({behavior:'smooth'})" data-en="SCROLL TO EXPLORE ↓" data-tw="向下滾動探索 ↓">SCROLL TO EXPLORE ↓</p>
+    </section>
+
+    <div id="dash" class="dashboard">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h2 style="color:var(--primary); font-size: 2.5rem;" data-en="CORE EXPERIENCE – WHAT YOU DID" data-tw="核心經歷 – 我做了什麼">CORE EXPERIENCE – WHAT YOU DID</h2>
+        </div>
+
+        <h2 class="section-header" data-en="SECTION A – Leadership & Educational Design" data-tw="A部分 – 領導力與教育設計">SECTION A – Leadership & Educational Design</h2>
+        <div class="grid">
+            <div class="card" onclick="openModal('law')">
+                <h3 data-en="1. Vietnam Law Day 2024" data-tw="1. 2024年越南法律日">1. Vietnam Law Day 2024</h3>
+                <p data-en="Interactive Chat Story: 'The Virtual World: Hidden Traps'." data-tw="互動聊天故事：「虛擬世界：隱藏的陷阱」。">Interactive Chat Story: "The Virtual World: Hidden Traps".</p>
+            </div>
+            <div class="card" onclick="openModal('lit')">
+                <h3 data-en="2. Literature Workshop" data-tw="2. 文學工作坊">2. Literature Workshop</h3>
+                <p data-en="Practicing Traditional Folk Performing Arts." data-tw="實踐傳統民間表演藝術。">Practicing Traditional Folk Performing Arts.</p>
+            </div>
+        </div>
+
+        <h2 class="section-header" data-en="SECTION B – Media & Community Building" data-tw="B部分 – 媒體與社群建設">SECTION B – Media & Community Building</h2>
+        <div class="grid">
+            <div class="card" onclick="openModal('tarot')">
+                <h3 data-en="3. Behind the Sun Tarot" data-tw="3. 太陽背後的塔羅牌">3. Behind the Sun Tarot</h3>
+                <p data-en="Interactive Tarot Draw for digital storytelling." data-tw="用於數位故事講述的互動塔羅牌抽牌。">Interactive Tarot Draw for digital storytelling.</p>
+            </div>
+        </div>
+
+        <h2 class="section-header" data-en="SECTION C – Collaboration & Real-World Exposure" data-tw="C部分 – 合作與現實世界的接觸">SECTION C – Collaboration & Real-World Exposure</h2>
+        <div class="grid">
+            <div class="card" onclick="openModal('wa')">
+                <h3 data-en="4. White Acoustic Club (WA)" data-tw="4. 白音響俱樂部 (WA)">4. White Acoustic Club (WA)</h3>
+                <p data-en="School club" data-tw="學校俱樂部">School club</p>
+            </div>
+            <div class="card" onclick="openModal('hcdg')">
+                <h3 data-en="5. Hội chợ dân gian NHH" data-tw="5. NHH 民間集市">5. Hội chợ dân gian NHH</h3>
+                <p data-en="Music event" data-tw="音樂活動">Music event</p>
+            </div>
+        </div>
+
+        <h2 class="section-header" data-en="SECTION D – Initiative & Entrepreneurship" data-tw="D部分 – 倡議與創業精神">SECTION D – Initiative & Entrepreneurship</h2>
+        <div class="grid">
+            <div class="card" onclick="openModal('mono')">
+                <h3 data-en="6. Road Safety Web Game" data-tw="6. 道路安全網頁遊戲">6. Road Safety Web Game</h3>
+                <p data-en="In Development. Monopoly-style educational game." data-tw="開發中。大富翁風格的教育遊戲。">In Development. Monopoly-style educational game.</p>
+            </div>
+            <div class="card" onclick="openModal('ai')">
+                <h3 data-en="7. AI Career Orientation" data-tw="7. 人工智慧職涯導向">7. AI Career Orientation</h3>
+                <p data-en="Survey & Website to explore career paths." data-tw="用於探索職業道路的調查與網站。">Survey & Website to explore career paths.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="closing-section">
+        <div class="closing-box">
+            <h2 style="color:var(--primary); font-size: 2.5rem; text-align:center; margin-bottom: 2rem;" data-en="III. CLOSING - SO WHAT?" data-tw="III. 結語 - 所以呢？">III. CLOSING - SO WHAT?</h2>
+            
+            <div class="close-card">
+                <h3 style="color:var(--accent); margin-bottom:10px;" data-en="What I do well" data-tw="我擅長什麼">What I do well</h3>
+                <p data-en="Through organizing events, leading student teams, and building online communities, I developed strong communication and storytelling skills. I enjoy translating complex ideas into relatable experiences and creating spaces where people can connect, learn, and reflect." data-tw="透過組織活動、領導學生團隊和建立線上社群，我培養了強大的溝通和講故事的能力。我喜歡將複雜的想法轉化為容易產生共鳴的體驗，並創造讓人們可以聯繫、學習和反思的空間。">Through organizing events, leading student teams, and building online communities, I developed strong communication and storytelling skills. I enjoy translating complex ideas into relatable experiences and creating spaces where people can connect, learn, and reflect.</p>
+            </div>
+
+            <div class="close-card" style="border-color: var(--secondary);">
+                <h3 style="color:var(--secondary); margin-bottom:10px;" data-en="What I’m improving" data-tw="我正在改進什麼">What I’m improving</h3>
+                <p data-en="At the same time, I recognize that my background is stronger in communication and community work than in technical analysis. This has motivated me to actively explore programming, data analysis, and technology through independent projects such as educational web applications and survey-based research." data-tw="同時，我認識到我的背景在溝通和社區工作方面比在技術分析方面更強。這促使我透過獨立計畫（例如教育網頁應用程式和基於調查的研究）積極探索程式設計、資料分析和技術。">At the same time, I recognize that my background is stronger in communication and community work than in technical analysis. This has motivated me to actively explore programming, data analysis, and technology through independent projects such as educational web applications and survey-based research.</p>
+            </div>
+
+            <div class="close-card" style="border-color: var(--success);">
+                <h3 style="color:var(--success); margin-bottom:10px;" data-en="What’s next" data-tw="下一步是什麼">What’s next</h3>
+                <p data-en="Studying in Taiwan will allow me to strengthen the analytical and technical skills needed in the technology field, while combining them with my ability to understand people and communities. My goal is to use data not only to analyze information, but to better understand human behavior and design meaningful, socially impactful solutions." data-tw="在台灣學習將使我能夠加強技術領域所需的分析和技術技能，同時將它們與我理解人員和社區的能力結合。我的目標不僅是使用數據來分析資訊，還要更好地理解人類行為並設計有意義、具有社會影響力的解決方案。">Studying in Taiwan will allow me to strengthen the analytical and technical skills needed in the technology field, while combining them with my ability to understand people and communities. My goal is to use data not only to analyze information, but to better understand human behavior and design meaningful, socially impactful solutions.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="lightbox" onclick="closeLightbox()">
+        <span class="close-lb">&times;</span>
+        <img id="lb-img" src="" alt="Full screen">
+    </div>
+
+    <script>
+        // --- GLOBAL VARIABLES & UTILS ---
+        let currentLang = 'en';
+        const cheoAudio = new Audio('cheo.mp3');
+        const waAudio = new Audio('wa.mp3');
+
+        function openLightbox(src) {
+            document.getElementById('lb-img').src = src;
+            document.getElementById('lightbox').classList.add('active');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'tw' : 'en';
+            applyLang();
+            document.getElementById('lang-btn').innerText = currentLang === 'en' ? '🇹🇼 Switch to TW' : '🇬🇧 Switch to EN';
+        }
+
+        function applyLang() {
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.innerHTML = el.getAttribute(`data-${currentLang}`);
+            });
+            const tarotInput = document.getElementById('tarot-input');
+            if(tarotInput) tarotInput.placeholder = currentLang === 'en' ? "Type your question here..." : "在這裡輸入你的問題...";
+        }
+
+        // ==========================================
+        // 1. LAW DAY
+        // ==========================================
+        const lawTpl = `
+            <h2 style="color:var(--primary); margin-bottom:10px;" data-en="Vietnam Law Day 2024: 'The Virtual World: Hidden Traps'" data-tw="2024年越南法律日：「虛擬世界：隱藏的陷阱」">Vietnam Law Day 2024: "The Virtual World: Hidden Traps"</h2>
+            <div class="chat-box" id="law-chat-box">
+                <div class="msg bot" data-en="Unknown Number: Hey, did you see this photo of you? Everyone in school is talking about it! 😱 👉 <b>http://bit.ly/leak-photo-NHH</b>" data-tw="未知號碼：嘿，你看到這張你的照片了嗎？學校裡每個人都在談論它！😱 👉 <b>http://bit.ly/leak-photo-NHH</b>">Unknown Number: Hey, did you see this photo of you? Everyone in school is talking about it! 😱 👉 <b>http://bit.ly/leak-photo-NHH</b></div>
+            </div>
+            <div id="law-options" class="chat-options">
+                <button class="chat-btn" onclick="stepLaw(1)" data-en='"Who is this? Send the photo here."' data-tw='"這是誰？把照片發到這裡。"'>"Who is this? Send the photo here."</button>
+                <button class="chat-btn" onclick="stepLaw(2)" data-en="Click the link to check the photo." data-tw="點擊連結查看照片。">Click the link to check the photo.</button>
+                <button class="chat-btn" onclick="stepLaw(3)" data-en="Ignore, Block & Report." data-tw="忽略、封鎖並檢舉。">Ignore, Block & Report.</button>
+            </div>
+            <div id="law-info" class="hidden fade-in content-block" style="margin-top:20px;">
+                <p style="color:var(--accent); font-style:italic; padding:10px; background:rgba(255,230,0,0.1); border-left:4px solid var(--accent);" data-en="*Note: You have just experienced a simulated scenario of an online phishing scam.*" data-tw="*註解：您剛剛體驗了一個模擬的網路釣魚詐騙場景。*">*Note: You have just experienced a simulated scenario of an online phishing scam.*</p>
+                
+                <h3 data-en="Role: Head of Organizing Committee" data-tw="職位：組委會主席">Role: Head of Organizing Committee</h3>
+                
+                <p><b data-en="What I did:" data-tw="我做了什麼：">What I did:</b></p>
+                <ul>
+                    <li data-en="Organized task divisions and coordinated small teams responsible for different parts of the program" data-tw="組織任務分工並協調負責專案不同部分的小組">Organized task divisions and coordinated small teams responsible for different parts of the program</li>
+                    <li data-en="Designed interactive scenarios and games illustrating online risks and cybersecurity issues" data-tw="設計了說明線上風險和網路安全問題的互動場景和遊戲">Designed interactive scenarios and games illustrating online risks and cybersecurity issues</li>
+                    <li data-en="Led a school-wide legal awareness campaign for Vietnam Law Day" data-tw="領導了越南法律日的全校法律意識宣傳活動">Led a school-wide legal awareness campaign for Vietnam Law Day</li>
+                </ul>
+                
+                <p><b data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</b></p>
+                <ul>
+                    <li data-en="Leadership and team coordination" data-tw="領導力與團隊協調">Leadership and team coordination</li>
+                    <li data-en="Translating complex knowledge into engaging learning experiences" data-tw="將複雜的知識轉化為引人入勝的學習體驗">Translating complex knowledge into engaging learning experiences</li>
+                    <li data-en="Designing interactive educational programs for students" data-tw="為學生設計互動教育計畫">Designing interactive educational programs for students</li>
+                </ul>
+                
+                <div class="img-grid">
+                    <img src="law day 1.JPG" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="law day 2.JPG" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="law day 3.JPG" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="law day 4.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="law day 5.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                </div>
+            </div>
+        `;
+
+        function stepLaw(choice) {
+            const chatBox = document.getElementById('law-chat-box');
+            const options = document.getElementById('law-options');
+            if(choice === 1) {
+                chatBox.innerHTML += `<div class="msg user" data-en="Who is this? Send the photo here." data-tw="這是誰？把照片發到這裡。">Who is this? Send the photo here.</div>`;
+                setTimeout(() => { chatBox.innerHTML += `<div class="msg bot" data-en="I can't attach it, the file is too big. Just click the link, trust me! 👉 <b>http://bit.ly/leak-photo-NHH</b>" data-tw="檔案太大無法附加。相信我，點擊連結就對了！ 👉 <b>http://bit.ly/leak-photo-NHH</b>">I can't attach it, the file is too big... 👉 <b>http://bit.ly/leak-photo-NHH</b></div>`; chatBox.scrollTop = chatBox.scrollHeight; applyLang(); }, 800);
+            } 
+            else if(choice === 2) {
+                chatBox.innerHTML += `<div class="msg user" data-en="*Clicks the link*" data-tw="*點擊連結*">*Clicks the link*</div>`; options.style.display = 'none';
+                setTimeout(() => { chatBox.innerHTML += `<div class="msg bot" style="background:var(--danger)" data-en="<b>⚠️ SYSTEM ALERT:</b> Malware downloaded. Social media accounts compromised. You fell into the trap!" data-tw="<b>⚠️ 系統警報：</b>已下載惡意軟體。社群媒體帳號被盜。你掉進陷阱了！"><b>⚠️ SYSTEM ALERT:</b> Malware downloaded. You fell into the trap!</div>`; chatBox.scrollTop = chatBox.scrollHeight; applyLang(); setTimeout(() => document.getElementById('law-info').classList.remove('hidden'), 1000); }, 800);
+            }
+            else if(choice === 3) {
+                chatBox.innerHTML += `<div class="msg user" data-en="*Blocked & Reported*" data-tw="*已封鎖並檢舉*">*Blocked & Reported*</div>`; options.style.display = 'none';
+                setTimeout(() => { chatBox.innerHTML += `<div class="msg bot" style="background:var(--success); color:#000;" data-en="<b>✅ SAFE:</b> You successfully avoided a common phishing trap." data-tw="<b>✅ 安全：</b>您成功避開了常見的網路釣魚陷阱。"><b>✅ SAFE:</b> You successfully avoided a common phishing trap.</div>`; chatBox.scrollTop = chatBox.scrollHeight; applyLang(); setTimeout(() => document.getElementById('law-info').classList.remove('hidden'), 1000); }, 800);
+            }
+            applyLang();
+        }
+
+       // ==========================================
+// 2. CHÈO GAME
+// ==========================================
+const litTpl = `
+    <h2 style="color:var(--primary)" data-en="Literature Workshop: Practicing Traditional Folk Performing Arts" data-tw="文學工作坊：實踐傳統民間表演藝術">Literature Workshop: Practicing Traditional Folk Performing Arts</h2>
+    <p style="text-align:center;" data-en="Get ready! Click the drum when it lights up. Reach 5 points to unlock the workshop." data-tw="準備好！當鼓亮起時點擊它。達到 5 分即可解鎖工作坊。">Get ready! Click the drum when it lights up.</p>
+    <div class="score-board"><span data-en="Score: " data-tw="分數： ">Score: </span><span id="audi-score">0</span> / 5</div>
+    <div class="audi-container">
+        <div class="drum" id="drum-0" onmousedown="hitAudition(0)">🥁</div><div class="drum" id="drum-1" onmousedown="hitAudition(1)">🥁</div>
+        <div class="drum" id="drum-2" onmousedown="hitAudition(2)">🥁</div><div class="drum" id="drum-3" onmousedown="hitAudition(3)">🥁</div>
+        <div class="drum" id="drum-4" onmousedown="hitAudition(4)">🥁</div>
+    </div>
+
+    <div id="lit-info" class="hidden fade-in content-block">
+        <div style="background: rgba(0, 240, 255, 0.1); border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 25px;">
+            <p style="font-size: 0.95rem; color: #fff; line-height: 1.5;" 
+               data-en="💡 You just heard a snippet from <b>'Quan Am Thi Kinh'</b>, one of Vietnam's most iconic <b>Chèo</b> plays. Chèo is a form of traditional satirical musical theater, combining folk songs, dance, and storytelling that dates back to the 10th century." 
+               data-tw="💡 你剛剛聽到了<b>《觀音氏敬》</b>的片段，這是越南最具代表性的<b>嘲劇 (Chèo)</b> 劇目之一。嘲劇是一種傳統的諷刺音樂劇，結合了民歌、舞蹈和故事講述，起源於 10 世紀。">
+               💡 You just heard a snippet from 'Quan Am Thi Kinh', one of Vietnam's most iconic Chèo plays...
+            </p>
+        </div>
+
+        <h3 data-en="Role: Vice Head Organizer | Scriptwriter | MC" data-tw="職位：副主辦人 | 編劇 | 主持人">Role: Vice Head Organizer | Scriptwriter | MC</h3>
+        <p><b data-en="What I did:" data-tw="我做了什麼：">What I did:</b></p>
+        <ul>
+            <li data-en="Wrote the program script and designed the workshop structure" data-tw="編寫節目腳本並設計工作坊結構">Wrote the program script and designed the workshop structure</li>
+            <li data-en="Organized preparation tasks and divided responsibilities among teams" data-tw="組織準備工作並在團隊間劃分職責">Organized preparation tasks and divided responsibilities among teams</li>
+            <li data-en="Hosted and coordinated the program flow, handling unexpected situations during the event" data-tw="主持並協調節目流程，處理活動期間的突發狀況">Hosted and coordinated the program flow, handling unexpected situations during the event</li>
+        </ul>
+        <p><b data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</b></p>
+        <ul>
+            <li data-en="Educational storytelling" data-tw="教育故事講述">Educational storytelling</li>
+            <li data-en="Program design and event coordination" data-tw="節目設計與活動協調">Program design and event coordination</li>
+            <li data-en="Managing timelines and maintaining audience engagement" data-tw="管理時間表並維持觀眾參與度">Managing timelines and maintaining audience engagement</li>
+        </ul>
+        <p style="margin-top:10px;"><a href="https://plo.vn/hoc-sinh-hieu-ve-loai-hinh-san-khau-truyen-thong-qua-dien-cheo-mua-roi-nuoc-post773531.html" target="_blank" class="external-link" data-en="🔗 Read News Article (PLO)" data-tw="🔗 閱讀新聞文章 (PLO)">🔗 Read News Article (PLO)</a></p>
+        <div class="img-grid">
+            <img src="workshop 1.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)"> 
+            <img src="workshop 2.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)"> 
+            <img src="workshop 3.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+            <img src="workshop 4.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+            <img src="workshop 5.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+            <img src="workshop 6.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+            <img src="workshop 7.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+            <img src="workshop 8.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+        </div>
+    </div>
+`;
+        let audiScore = 0; let audiActiveIdx = -1; let audiInterval;
+        function startAuditionGame() {
+            audiScore = 0; audiActiveIdx = -1; document.getElementById('audi-score').innerText = audiScore;
+            cheoAudio.currentTime = 15; cheoAudio.play();
+            audiInterval = setInterval(() => {
+                if(audiActiveIdx !== -1) document.getElementById('drum-'+audiActiveIdx).classList.remove('lit');
+                audiActiveIdx = Math.floor(Math.random() * 5); document.getElementById('drum-'+audiActiveIdx).classList.add('lit');
+            }, 600);
+        }
+        function hitAudition(idx) {
+            const drum = document.getElementById('drum-'+idx);
+            if(idx === audiActiveIdx) {
+                drum.classList.remove('lit'); drum.classList.add('hit-success'); setTimeout(() => drum.classList.remove('hit-success'), 200);
+                audiScore++; document.getElementById('audi-score').innerText = audiScore;
+                if(audiScore >= 5) { clearInterval(audiInterval); document.querySelectorAll('.drum').forEach(d => d.classList.remove('lit')); cheoAudio.pause(); document.getElementById('lit-info').classList.remove('hidden'); }
+            } else { drum.classList.add('hit-fail'); setTimeout(() => drum.classList.remove('hit-fail'), 200); }
+        }
+
+        // ==========================================
+        // 3. TAROT AI GENERATOR (Full 78 Cards)
+        // ==========================================
+        const tarotData = [
+            {en:"The Fool", tw:"愚者", kw:"new beginnings, leap of faith, risk"}, {en:"The Magician", tw:"魔術師", kw:"manifestation, capability, power"},
+            {en:"The High Priestess", tw:"女祭司", kw:"intuition, mystery, subconscious"}, {en:"The Empress", tw:"皇后", kw:"nurturing, abundance, creation"},
+            {en:"The Emperor", tw:"皇帝", kw:"structure, authority, control"}, {en:"The Hierophant", tw:"教皇", kw:"tradition, belief systems, learning"},
+            {en:"The Lovers", tw:"戀人", kw:"choices, harmony, relationships"}, {en:"The Chariot", tw:"戰車", kw:"direction, control, willpower"},
+            {en:"Strength", tw:"力量", kw:"courage, patience, compassion"}, {en:"The Hermit", tw:"隱士", kw:"soul-searching, introspection, guidance"},
+            {en:"Wheel of Fortune", tw:"命運之輪", kw:"change, cycles, fate"}, {en:"Justice", tw:"正義", kw:"truth, fairness, cause and effect"},
+            {en:"The Hanged Man", tw:"倒吊人", kw:"sacrifice, release, new perspective"}, {en:"Death", tw:"死神", kw:"endings, transformation, transition"},
+            {en:"Temperance", tw:"節制", kw:"balance, moderation, patience"}, {en:"The Devil", tw:"惡魔", kw:"attachment, restriction, materialism"},
+            {en:"The Tower", tw:"高塔", kw:"sudden upheaval, revelation, awakening"}, {en:"The Star", tw:"星星", kw:"hope, faith, rejuvenation"},
+            {en:"The Moon", tw:"月亮", kw:"illusion, fear, anxiety"}, {en:"The Sun", tw:"太陽", kw:"joy, success, vitality"},
+            {en:"Judgement", tw:"審判", kw:"rebirth, inner calling, absolution"}, {en:"The World", tw:"世界", kw:"completion, integration, travel"}
+        ];
+        const suits = ['Wands', 'Cups', 'Swords', 'Pentacles'];
+        const suitsTw = ['權杖', '聖杯', '寶劍', '星幣'];
+        const values = ['Ace','2','3','4','5','6','7','8','9','10','Page','Knight','Queen','King'];
+        suits.forEach((suit, sIdx) => {
+            values.forEach((val, vIdx) => {
+                tarotData.push({ 
+                    en: `${val} of ${suit}`, tw: `${suitsTw[sIdx]}的${val}`, 
+                    kw: sIdx===0 ? "action, passion" : sIdx===1 ? "emotion, intuition" : sIdx===2 ? "intellect, conflict" : "material, foundation" 
+                });
+            });
+        });
+
+        const tarotTpl = `
+            <h2 style="color:var(--primary); text-align:center" data-en="Behind the Sun Tarot" data-tw="太陽背後的塔羅牌">Behind the Sun Tarot</h2>
+            <div class="tarot-stage" id="t-stage-1">
+                <p style="margin-bottom: 10px;" data-en="Ask a specific question (e.g., 'Will my project succeed?', 'How to handle stress?')" data-tw="問一個具體的問題（例如：「我的專案會成功嗎？」、「如何處理壓力？」）">Ask a specific question...</p>
+                <input type="text" id="tarot-input" class="tarot-input" placeholder="Type your question here...">
+                <br>
+                <button class="btn-link" onclick="shuffleTarot()" data-en="Shuffle 78 Cards" data-tw="洗 78 張牌">Shuffle 78 Cards</button>
+            </div>
+            
+            <div id="t-stage-2" class="hidden fade-in text-center">
+                <p style="color:var(--accent); font-weight:bold; margin-bottom:10px;" data-en="Pick exactly 3 cards." data-tw="請準確選擇 3 張牌。">Pick exactly 3 cards.</p>
+                <div class="tarot-deck" id="tarot-deck-container"></div>
+            </div>
+
+            <div id="t-stage-3" class="hidden fade-in">
+                <div class="reading-box" id="tarot-reading"></div>
+                
+                <div class="content-block" style="margin-top:30px;">
+                    <h3 data-en="Role: Founder" data-tw="職位：創始人">Role: Founder</h3>
+                    <p><b data-en="What I did:" data-tw="我做了什麼：">What I did:</b></p>
+                    <ul>
+                        <li data-en="Created a storytelling-based tarot project focused on reflection and emotional support for young people" data-tw="創建了一個基於故事講述的塔羅牌計畫，專注於年輕人的反思和情感支持">Created a storytelling-based tarot project focused on reflection and emotional support for young people</li>
+                        <li data-en="Managed branding and audience engagement on Instagram and TikTok" data-tw="管理 Instagram 和 TikTok 上的品牌推廣和觀眾參與">Managed branding and audience engagement on Instagram and TikTok</li>
+                        <li data-en="Produced creative content and built a small online community" data-tw="製作創意內容並建立了一個小型線上社群">Produced creative content and built a small online community</li>
+                    </ul>
+                    <p><b data-en="Result:" data-tw="結果：">Result:</b></p>
+                    <ul><li data-en="Generated early personal income which I used to self-study IELTS and expand my opportunities for international education" data-tw="產生了早期的個人收入，我用它來自學雅思並擴大了我接受國際教育的機會">Generated early personal income which I used to self-study IELTS and expand my opportunities for international education</li></ul>
+                    <p><b data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</b></p>
+                    <ul>
+                        <li data-en="Social media branding and digital storytelling" data-tw="社群媒體品牌推廣和數位故事講述">Social media branding and digital storytelling</li>
+                        <li data-en="Understanding online communities and audience engagement" data-tw="了解線上社群和觀眾參與">Understanding online communities and audience engagement</li>
+                        <li data-en="Managing an independent online project" data-tw="管理獨立的線上計畫">Managing an independent online project</li>
+                    </ul>
+                    <div class="img-grid">
+                        <img src="tarot 1.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                        <img src="tarot 2.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                        <img src="tarot 3.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                        <img src="tarot 4.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let selectedCardsArr = [];
+        function shuffleTarot() {
+            const input = document.getElementById('tarot-input').value;
+            if(!input.trim()) return alert(currentLang === 'en' ? "Please type your question!" : "請輸入您的問題！");
+            document.getElementById('t-stage-1').classList.add('hidden');
+            document.getElementById('t-stage-2').classList.remove('hidden');
+            const container = document.getElementById('tarot-deck-container');
+            container.innerHTML = ''; selectedCardsArr = [];
+            const shuffledDeck = [...tarotData].sort(() => 0.5 - Math.random());
+            for(let i=0; i<78; i++) {
+                const c = document.createElement('div'); c.className = 't-card';
+                c.innerHTML = `<div class="t-card-front">🔮</div><div class="t-card-back"><span data-en="${shuffledDeck[i].en}" data-tw="${shuffledDeck[i].tw}">${currentLang === 'en' ? shuffledDeck[i].en : shuffledDeck[i].tw}</span></div>`;
+                c.onclick = () => {
+                    if(!c.classList.contains('flipped') && selectedCardsArr.length < 3) {
+                        c.classList.add('flipped'); selectedCardsArr.push(shuffledDeck[i]);
+                        if(selectedCardsArr.length === 3) setTimeout(generateAIReading, 1000);
+                    }
+                };
+                container.appendChild(c);
+            }
+        }
+
+        function generateAIReading() {
+            document.getElementById('t-stage-2').classList.add('hidden');
+            document.getElementById('t-stage-3').classList.remove('hidden');
+            const userQ = document.getElementById('tarot-input').value;
+            const c1 = selectedCardsArr[0]; const c2 = selectedCardsArr[1]; const c3 = selectedCardsArr[2];
+            const readingEn = `
+                <h3 style="color:var(--primary); margin-bottom:10px;">✨ AI Guided Reading</h3>
+                <p style="color:var(--muted); font-size:0.9rem; margin-bottom:15px;"><i>*AI generated based on 78-card semantics and your input.*</i></p>
+                <p>You asked: <b>"${userQ}"</b></p>
+                <p>1. <b>Context (${c1.en}):</b> This card suggests an atmosphere of <i>${c1.kw}</i> surrounding your situation.</p>
+                <p>2. <b>Action (${c2.en}):</b> To address your question, focus on the energy of <i>${c2.kw}</i>. It's the key step to take right now.</p>
+                <p>3. <b>Outcome (${c3.en}):</b> If you navigate this well, the path leads to a state of <i>${c3.kw}</i>.</p>
+                <p style="margin-top:10px; color:var(--accent);">Conclusion: The data patterns in your cards reflect that finding balance between these elements will guide you through your inquiry.</p>
+            `;
+            const readingTw = `
+                <h3 style="color:var(--primary); margin-bottom:10px;">✨ AI 引導解牌</h3>
+                <p style="color:var(--muted); font-size:0.9rem; margin-bottom:15px;"><i>*基於 78 張牌語義和您的輸入由 AI 生成。*</i></p>
+                <p>你的問題：<b>「${userQ}」</b></p>
+                <p>1. <b>背景 (${c1.tw}):</b> 這張牌暗示了圍繞你情況的一種 <i>${c1.kw}</i> 氛圍。</p>
+                <p>2. <b>行動 (${c2.tw}):</b> 為了回答你的問題，請關注 <i>${c2.kw}</i> 的能量。這是現在要採取的關鍵步驟。</p>
+                <p>3. <b>結果 (${c3.tw}):</b> 如果你處理得好，這條路將通向 <i>${c3.kw}</i> 的狀態。</p>
+                <p style="margin-top:10px; color:var(--accent);">結論：你的牌中的數據模式反映了在這些元素之間找到平衡將引導你完成探究。</p>
+            `;
+            document.getElementById('tarot-reading').innerHTML = currentLang === 'en' ? readingEn : readingTw;
+            document.getElementById('tarot-reading').setAttribute('data-en', readingEn);
+            document.getElementById('tarot-reading').setAttribute('data-tw', readingTw);
+        }
+
+       // ==========================================
+// 4. WA MIXER (Updated to 8 channels)
+// ==========================================
+const waItems = [
+    { label: 'CH1: Media', img: ['wa 1.jpg', 'wa 7.jpg', 'wa 8.jpg'], en: 'Managed social media content and visual communication.', tw: '管理社群媒體內容和視覺傳達。' },
+    { label: 'CH2: Visuals', img: ['wa 2.jpg', 'wa 9.jpg', 'wa 10.jpg'], en: 'Designed visual strategies for club campaigns.', tw: '為俱樂部活動設計視覺策略。' },
+    { label: 'CH3: Filming', img: ['wa 3.JPG', 'wa 11.jpg', 'wa 12.jpg'], en: 'Filmed live acoustic performances.', tw: '拍攝現場不插電表演。' },
+    { label: 'CH4: MV Prod', img: ['wa 4.JPG', 'wa 13.jpg'], en: 'Supported music video production.', tw: '支持音樂錄影帶製作。' },
+    { label: 'CH5: Workflow', img: ['wa 5.jpg', 'wa 15.jpg'], en: 'Managed the media team workflow and budget.', tw: '管理媒體團隊工作流程與預算。' },
+    { label: 'CH6: Events', img: ['wa 6.jpg', 'wa 14.jpg'], en: 'Coordinated media-related activities for club operations.', tw: '協調俱樂部運營的媒體相關活動。' },
+    { label: 'CH7: Cert', img: ['wa cert.jpg'], en: 'Certificate of recognition for my contributions.', tw: '對我貢獻的認可證書。' },
+    { label: 'CH8: ID', img: ['wa thẻ.jpg'], en: 'My official White Acoustic Club member ID.', tw: '我的官方白音響俱樂部會員證。' }
+];
+
+const waTpl = `
+    <h2 style="color:var(--primary)" data-en="White Acoustic Club (WA)" data-tw="白音響俱樂部 (WA)">White Acoustic Club (WA)</h2>
+    <p style="font-size: 0.85rem; font-style: italic; color: var(--muted); margin-bottom: 10px;" 
+       data-en="🎶 Now playing: 'Valentine Project' – a special performance by White Acoustic Club." 
+       data-tw="🎶 正在播放：'Valentine Project' – 白音響俱樂部的特別演出。">
+       🎶 Now playing: 'Valentine Project' – a special performance by White Acoustic Club.
+    </p>
+
+    <div class="display-screen" id="wa-display" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
+        <p style="color:var(--muted)" data-en="Interact with the 8 channels below to see my workflow & memories." data-tw="與下方的 8 個頻道互動以查看我的工作流程和回憶。">Interact with the 8 channels below to see my workflow & memories.</p>
+        <h1 style="color:var(--primary); font-size:3rem; margin-top:10px;">🎛️</h1>
+    </div>
+
+    <div class="mixer-board">
+        ${waItems.map((item, idx) => `
+        <div class="channel">
+            <div class="channel-lbl">${item.label}</div>
+            <div class="btn-pad" id="wa-pad-${idx}" onmousedown="triggerWA(${idx})"></div>
+        </div>`).join('')}
+    </div>
+
+    <div class="content-block">
+        <h3 data-en="Roles:" data-tw="角色：">Roles:</h3>
+        <p data-en="Content Writer (2024–2025) | Head of Media (2025–2026)" data-tw="內容撰稿人 (2024–2025) | 媒體部負責人 (2025–2026)">Content Writer (2024–2025) | Head of Media (2025–2026)</p>
+        
+        <h3 data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</h3>
+        <ul>
+            <li data-en="Digital storytelling and creative communication" data-tw="數位故事講述與創意溝通">Digital storytelling and creative communication</li>
+            <li data-en="Managing creative teams and collaborative workflows" data-tw="管理創意團隊與協作工作流程">Managing creative teams and collaborative workflows</li>
+            <li data-en="Building an online platform for students passionate about music" data-tw="為熱愛音樂的學生建立線上平台">Building an online platform for students passionate about music</li>
+        </ul>
+    </div>
+`;
+
+function triggerWA(idx) {
+    // 1. Highlight nút đang nhấn
+    document.querySelectorAll('.btn-pad').forEach(b => b.classList.remove('active'));
+    document.getElementById('wa-pad-' + idx).classList.add('active');
+
+    const screen = document.getElementById('wa-display');
+    
+    // 2. Tạo danh sách ảnh (Render mảng ảnh)
+    const imagesHtml = waItems[idx].img.map(imgSrc => `
+        <img class="wa-img-display fade-in" 
+             src="${imgSrc}" 
+             onerror="this.style.display='none'" 
+             onclick="openLightbox(this.src)" 
+             style="max-height: 180px; width: auto; object-fit: contain; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);" />
+    `).join('');
+
+    // 3. Cập nhật màn hình hiển thị
+    screen.innerHTML = `
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; margin-bottom: 15px;">
+            ${imagesHtml}
+        </div>
+        <p class="fade-in" style="color:#fff; font-size:1.1rem; text-align: center;" 
+           data-en="${waItems[idx].en}" 
+           data-tw="${waItems[idx].tw}">
+           ${currentLang === 'en' ? waItems[idx].en : waItems[idx].tw}
+        </p>
+    `;
+}
+
+        // ==========================================
+        // 5. CATCH TICKET GAME (Updated win state)
+        // ==========================================
+        const hcdgTpl = `
+            <h2 style="color:var(--primary)" data-en='Hội chợ dân gian Nguyễn Hữu Huân – "Nghe Hay Ha!"' data-tw='NHH 民間集市："Nghe Hay Ha！"'>Hội chợ dân gian Nguyễn Hữu Huân – "Nghe Hay Ha!"</h2>
+            <div id="hcdg-header">
+                <p data-en="Catch 10 tickets (🎟️) to win! Avoid the bombs (💣)." data-tw="抓住 10 張票 (🎟️) 即可獲勝！避開炸彈 (💣)。">Catch 10 tickets (🎟️) to win! Avoid the bombs (💣).</p>
+                <p style="margin: 10px 0; font-size:1.2rem;"><b><span data-en="Score: " data-tw="分數： ">Score: </span><span id="t-score" style="color:var(--success)">0</span>/10 | <span data-en="Lives: " data-tw="生命： ">Lives: </span><span id="t-lives">❤️❤️❤️</span></b></p>
+            </div>
+            
+            <div class="game-canvas" id="ticket-canvas"></div>
+            
+            <div id="hcdg-info" class="hidden fade-in content-block" style="margin-top:20px">
+                <h3 data-en="Role: C&M Team Member (Communication & Marketing)" data-tw="職位：C&M 團隊成員（公關與行銷）">Role: C&M Team Member (Communication & Marketing)</h3>
+                <p><b data-en="What I did:" data-tw="我做了什麼：">What I did:</b></p>
+                <ul>
+                    <li data-en="Supported online communication and promotion of the event through social media" data-tw="支持社群媒體上的線上交流和活動推廣">Supported online communication and promotion of the event through social media</li>
+                    <li data-en="Contributed ideas for promotional posts and campaign content" data-tw="為推廣貼文和活動內容貢獻想法">Contributed ideas for promotional posts and campaign content</li>
+                    <li data-en="Participated in organizing offline promotional activities to increase event visibility and ticket sales" data-tw="參與組織線下推廣活動以提高活動知名度和門票銷售">Participated in organizing offline promotional activities to increase event visibility and ticket sales</li>
+                </ul>
+                <p style="color:var(--accent)"><b data-en="Special note:" data-tw="特別注意：">Special note:</b> <span data-en="I was the youngest member of the organizing team" data-tw="我是組織團隊中最年輕的成員">I was the youngest member of the organizing team</span></p>
+                <p><b data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</b></p>
+                <ul>
+                    <li data-en="Understanding how large-scale student events are organized and promoted" data-tw="了解大型學生活動的組織和推廣方式">Understanding how large-scale student events are organized and promoted</li>
+                    <li data-en="Working collaboratively with multiple teams in a real-world environment" data-tw="在現實環境中與多個團隊合作">Working collaboratively with multiple teams in a real-world environment</li>
+                </ul>
+                <div class="img-grid">
+                    <img src="hcdg 1.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)"> 
+                    <img src="hcdg 2.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 3.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 4.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 5.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 6.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 7.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 8.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 9.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 10.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg 11.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="hcdg cert.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                </div>
+            </div>
+        `;
+
+        let catchInterval; let gameActive = false;
+        function getHearts(l) { return l===3 ? '❤️❤️❤️' : l===2 ? '❤️❤️💔' : l===1 ? '❤️💔💔' : '💔💔💔'; }
+        function startCatch() {
+            let score = 0, lives = 3; gameActive = true;
+            document.getElementById('t-score').innerText = score; document.getElementById('t-lives').innerText = getHearts(lives);
+            document.getElementById('hcdg-info').classList.add('hidden');
+            document.getElementById('hcdg-header').style.display = 'block';
+            const canvas = document.getElementById('ticket-canvas'); canvas.innerHTML = ''; 
+
+            catchInterval = setInterval(() => {
+                if(!gameActive) return clearInterval(catchInterval);
+                const isBomb = Math.random() > 0.7;
+                const el = document.createElement('div'); el.className = 'obj'; el.innerHTML = isBomb ? '💣' : '🎟️';
+                el.style.left = Math.random() * 85 + '%'; el.style.top = '-50px';
+                let top = -50;
+                const fall = setInterval(() => { top += 4; el.style.top = top + 'px'; if(top > 400) { clearInterval(fall); el.remove(); } }, 20);
+
+                const interact = (e) => {
+                    e.preventDefault(); e.stopPropagation(); clearInterval(fall); el.remove();
+                    if(isBomb) {
+                        lives--; document.getElementById('t-lives').innerText = getHearts(lives);
+                        if(lives <= 0) { gameActive = false; clearInterval(catchInterval); alert(currentLang === 'en' ? "Out of lives! Try again." : "生命耗盡！再試一次。"); startCatch(); }
+                    } else {
+                        score++; document.getElementById('t-score').innerText = score;
+                        if(score >= 10) { 
+                            gameActive = false; clearInterval(catchInterval); 
+                            document.getElementById('hcdg-header').style.display = 'none';
+                            canvas.innerHTML = `
+                                <div class="fade-in" style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; text-align:center; padding:20px;">
+                                    <h1 style="font-size:4rem; margin-bottom:10px;">🎉🎟️🎉</h1>
+                                    <h3 style="color:var(--primary); font-size:1.5rem;" data-en="Congratulations! You just won an exclusive ticket to Hội chợ dân gian Nguyễn Hữu Huân – 'Nghe Hay Ha!'!" data-tw="恭喜！您剛剛贏得了NHH民間集市「Nghe Hay Ha！」的專屬門票！">Congratulations! You just won an exclusive ticket to Hội chợ dân gian Nguyễn Hữu Huân – 'Nghe Hay Ha!'!</h3>
+                                    <p style="color:var(--accent); margin-top:15px; font-size:1.1rem;" data-en="Now scroll down to read the content and explore my journey! 👇" data-tw="現在向下滾動閱讀內容並探索我的旅程！👇">Now scroll down to read the content and explore my journey! 👇</p>
+                                </div>
+                            `;
+                            document.getElementById('hcdg-info').classList.remove('hidden');
+                            applyLang();
+                        }
+                    }
+                };
+                el.addEventListener('mousedown', interact); el.addEventListener('touchstart', interact, {passive: false}); canvas.appendChild(el);
+            }, 700);
+        }
+
+        // ==========================================
+        // 6. MONOPOLY (Updated Iframe & loading)
+        // ==========================================
+        const monoTpl = `
+            <h2 style="color:var(--primary)" data-en="Road Safety Educational Web Game (In Development)" data-tw="道路安全教育網頁遊戲 (開發中)">Road Safety Educational Web Game (In Development)</h2>
+            <div class="content-block">
+                <p><b data-en="Project idea:" data-tw="專案想法：">Project idea:</b></p>
+                <ul><li data-en="Developed a basic web-based board game inspired by Monopoly to educate students about traffic safety" data-tw="開發了一個靈感來自大富翁的基礎網頁棋盤遊戲，以教育學生交通安全">Developed a basic web-based board game inspired by Monopoly to educate students about traffic safety</li></ul>
+                <p><b data-en="Inspiration:" data-tw="靈感來源：">Inspiration:</b></p>
+                <ul><li data-en="Based on a survey I conducted in 2024 among high school students in Thu Duc City about helmet usage and riding beyond passenger limits" data-tw="根據我2024年對守德市高中生進行的關於頭盔使用和超載騎行的調查">Based on a survey I conducted in 2024 among high school students in Thu Duc City about helmet usage and riding beyond passenger limits</li></ul>
+                <p><b data-en="Current progress:" data-tw="目前進度：">Current progress:</b></p>
+                <ul><li data-en="Core functions of the game have been developed and are currently being improved and debugged" data-tw="遊戲的核心功能已開發完成，目前正在改進和除錯">Core functions of the game have been developed and are currently being improved and debugged</li></ul>
+                <p><b data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</b></p>
+                <ul>
+                    <li data-en="Self-learning basic coding and web development" data-tw="自學基礎程式設計和網頁開發">Self-learning basic coding and web development</li>
+                    <li data-en="Transforming social research insights into educational digital tools" data-tw="將社會研究見解轉化為教育數位工具">Transforming social research insights into educational digital tools</li>
+                </ul>
+
+                <div id="mono-loading" style="text-align:center; margin: 30px 0; font-size: 1.2rem; color: var(--accent);" data-en="Loading game... Please wait a few seconds! ⏳" data-tw="遊戲加載中... 請稍等幾秒鐘！ ⏳">Loading game... Please wait a few seconds! ⏳</div>
+                <iframe src="https://thuducmonopolyy.netlify.app/" style="width:100%; height:500px; border:2px solid var(--primary); border-radius:10px; display:none; margin-top:20px;" onload="document.getElementById('mono-loading').style.display='none'; this.style.display='block';"></iframe>
+            </div>
+        `;
+
+        // ==========================================
+        // 7. AI CAREER (Updated with Quiz)
+        // ==========================================
+        const aiTpl = `
+            <h2 style="color:var(--primary)" data-en="AI Career Orientation Survey & Website" data-tw="AI 職涯導向調查與網站">AI Career Orientation Survey & Website</h2>
+            
+            <div id="ai-quiz-section" style="background:#1a1a3a; padding:20px; border-radius:10px; border:1px solid var(--secondary); margin-bottom:20px;">
+                <h3 style="color:var(--secondary); margin-bottom:10px;" data-en="Quick Personality Quiz!" data-tw="快速性格測試！">Quick Personality Quiz!</h3>
+                <p data-en="Student A is highly empathetic, loves organizing data, and enjoys public speaking. Which career suits them best?" data-tw="學生A非常有同理心，喜歡整理數據，並且喜歡公開演講。哪個職業最適合他們？">Student A is highly empathetic, loves organizing data, and enjoys public speaking. Which career suits them best?</p>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+                    <button class="chat-btn" style="text-align:left;" onclick="revealAI()" data-en="A) Data Analyst" data-tw="A) 數據分析師">A) Data Analyst</button>
+                    <button class="chat-btn" style="text-align:left;" onclick="revealAI()" data-en="B) Event Coordinator" data-tw="B) 活動協調員">B) Event Coordinator</button>
+                    <button class="chat-btn" style="text-align:left;" onclick="revealAI()" data-en="C) Psychologist" data-tw="C) 心理學家">C) Psychologist</button>
+                    <button class="chat-btn" style="text-align:left;" onclick="revealAI()" data-en="D) Teacher" data-tw="D) 老師">D) Teacher</button>
+                </div>
+            </div>
+
+            <div id="ai-content-section" class="hidden fade-in content-block">
+                <div style="background:rgba(0, 255, 102, 0.1); border-left:4px solid var(--success); padding:15px; margin-bottom:20px;">
+                    <p style="color:var(--success); font-weight:bold;" data-en="No matter what you chose, finding the 'perfect' career path isn't always obvious. That's exactly why career orientation and AI tools are so essential for students today!" data-tw="無論你選擇什麼，找到「完美」的職業道路並不總是顯而易見的。這正是為什麼職涯導向和人工智慧工具對當今學生如此重要！">No matter what you chose, finding the 'perfect' career path isn't always obvious. That's exactly why career orientation and AI tools are so essential for students today!</p>
+                </div>
+
+                <p><b data-en="Project idea:" data-tw="專案想法：">Project idea:</b></p>
+                <ul><li data-en="Conducted a survey in 2025 about AI awareness and career orientation among high school students" data-tw="在2025年進行了一項關於高中生AI意識和職涯導向的調查">Conducted a survey in 2025 about AI awareness and career orientation among high school students</li></ul>
+                <p><b data-en="Action:" data-tw="行動：">Action:</b></p>
+                <ul><li data-en="Developed a website and a prototype chatbot designed to help students explore career paths" data-tw="開發了一個網站和一個聊天機器人原型，旨在幫助學生探索職業道路">Developed a website and a prototype chatbot designed to help students explore career paths</li></ul>
+                <p><b data-en="Current progress:" data-tw="目前進度：">Current progress:</b></p>
+                <ul>
+                    <li data-en="The website has been completed and published" data-tw="網站已完成並發布">The website has been completed and published</li>
+                    <li data-en="The chatbot is still being improved" data-tw="聊天機器人仍在改進中">The chatbot is still being improved</li>
+                </ul>
+                <p><b data-en="What I learned:" data-tw="我學到了什麼：">What I learned:</b></p>
+                <ul>
+                    <li data-en="Collecting and analyzing survey data" data-tw="收集和分析調查數據">Collecting and analyzing survey data</li>
+                    <li data-en="Applying technology to address real educational challenges" data-tw="應用技術解決實際的教育挑戰">Applying technology to address real educational challenges</li>
+                </ul>
+                <p style="margin-top:15px;">
+                    <a href="https://sites.google.com/view/floralforfuture/trang-ch%E1%BB%A7" target="_blank" class="btn-link" style="margin-right:10px;" data-en="🌐 View Website" data-tw="🌐 瀏覽網站">🌐 View Website</a>
+                    <a href="https://poe.com/invite/a267cfa612d041f5adb91ca2bae6e03d" target="_blank" class="btn-link" style="background:var(--secondary);" data-en="🤖 Try Chatbot" data-tw="🤖 嘗試聊天機器人">🤖 Try Chatbot</a>
+                </p>
+                <div class="img-grid" style="margin-top:20px;">
+                    <img src="web hướng nghiệp 1.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 2.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 3.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 4.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 5.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 6.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 7.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                    <img src="web hướng nghiệp 8.jpg" onerror="this.style.display='none'" onclick="openLightbox(this.src)">
+                </div>
+            </div>
+        `;
+
+        function revealAI() {
+            document.getElementById('ai-quiz-section').style.display = 'none';
+            document.getElementById('ai-content-section').classList.remove('hidden');
+            applyLang();
+        }
+
+        // ==========================================
+        // Modal Control
+        // ==========================================
+        function openModal(id) {
+            const container = document.getElementById('modal-container');
+            const body = document.getElementById('modal-body');
+            container.classList.remove('hidden');
+            
+            if(id === 'law') body.innerHTML = lawTpl;
+            if(id === 'lit') { body.innerHTML = litTpl; startAuditionGame(); }
+            if(id === 'tarot') body.innerHTML = tarotTpl;
+            if(id === 'wa') { body.innerHTML = waTpl; waAudio.currentTime = 0; waAudio.play(); }
+            if(id === 'hcdg') { body.innerHTML = hcdgTpl; startCatch(); }
+            if(id === 'mono') body.innerHTML = monoTpl;
+            if(id === 'ai') body.innerHTML = aiTpl;
+
+            applyLang();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+            cheoAudio.pause(); cheoAudio.currentTime = 0; clearInterval(audiInterval);
+            waAudio.pause(); waAudio.currentTime = 0; gameActive = false; clearInterval(catchInterval);
+        }
+    </script>
+</body>
+</html>
